@@ -1,0 +1,682 @@
+{
+    "metadata": {
+        "version": "1.0",
+        "caption": "COVID 19",
+        "geo.anchors": [
+            { "lat":0, "lon":0, "id":"POP-AC" }
+        ]
+    },
+
+    "registry": {
+        "seconds/format": "yyyy-mm-dd hh:nn:ss",
+        "seconds/origin": "1970-01-01 00:00:01",
+        "seconds/what": "e",
+        "geo/length": "25"
+    },
+
+    "estados": {
+        "caption": "States of Brasil",
+        "items": [{ "id": "rj", "cod": 19, "caption": "Rio de Janeiro", "sub": "cidades_rj" }]
+    },
+
+    "cidades_rj": {
+        "caption": "Cities of Rio de Janeiro",
+        "items": [
+            { "id": "rio.rj", "cod": 1, "caption": "Rio de Janeiro", "sub": "bairros_rio_rj",
+            "lat0": -22.748794359402705, "lon0": -43.79543191836241, "lat1": -23.07633400606008, "lon1": -43.10176005437209,
+            "x": "-22.960468, -43.199746  -22.987946, -43.170372"}
+        ]
+    },
+
+    "record": {
+        "fields": [
+            { "id":"seconds", "type": "int" },
+            { "id":"lat", "type": "double" },
+            { "id":"lon", "type": "double" },
+            { "id":"pais", "type": "int" },
+            { "id":"estado", "type": "int" },
+            { "id":"cidade", "type": "int" },
+            { "id":"bairro", "type": "int" },
+            { "id":"volume", "type": "int" }
+        ]
+    },
+
+    "dimensions": [
+        { "id": "location", "height": 25, "class": [ "geo", "lat", "lon" ],
+            "desc": "Geolocalization of Event" },
+
+        { "id": "localidade", "height": 3,
+            "desc": "Geolocalization of Event",
+            "members": [
+                { "id": "estado", "class": [ "cat", "estado" ]},
+                { "id": "cidade", "class": [ "cat", "cidade" ]},
+                { "id": "bairro", "class": [ "cat", "bairro" ]}
+            ]
+        }
+    ],
+
+    "terminal": {
+        "default": {
+            "caption": "Used antennas", "unity":"Antennas"
+        },
+        "contents": [
+            { "id": "sum",  "caption": "Active calls", "formula": [ "sum", "volume"] } ,
+            { "id": "time", "container": {
+	            "bin": 3600,
+                "class": ["binlist", "seconds"],
+                "contents": [
+                    { "id": "hc",   "caption": "Antenas usadas", "unity":"Antennas", "formula":["counter"] },
+                    { "id": "hsum", "caption": "Chamadas ativas", "unity":"Calls", "formula":["sum", "volume" ] }
+                ] 
+            }}
+        ]
+    },
+
+    "ml.net" : {
+        "anomaly": [
+            { "alg": "Detect.IidSpike", "params": "95 100", "caption": "IidSpike", "ParamFields": [
+                    { "id": "Confidence", "default": 95},
+                    { "id": "Sliding Window", "default": 100} 
+                ] 
+            },
+            { "alg": "Detect.SpikeBySsa", "params": "95 12 10 3", "caption": "SpikeBySSA", "ParamFields": [
+                    { "id": "Confidence", "default": 95},
+                    { "id": "Sliding Window", "default": 12}, 
+                    { "id": "Training Window", "default": 10}, 
+                    { "id": "Seasonality Window" , "default": 3}
+                ] 
+            },
+            { "alg": "Detect.AnomalyBySrCnn", "params": "51 8 12 7 8", "caption": "AnomalyBySrCnn", "ParamFields": [ 
+                    { "id": "Sliding Window", "default": 51}, 
+                    { "id": "Back Add Window", "default": 8}, 
+                    { "id": "LookAhead Add Window", "default": 12},
+                    { "id": "Averaging Window", "default": 7},
+                    { "id": "Judgement Window", "default": 8} 
+                ] 
+            }
+        ],
+        "prediction": [
+            { "alg": "Prediction.Ols" },
+            { "alg": "Prediction.Lbfs" },
+            { "alg": "Prediction.Sdca"},
+            { "alg": "Prediction.FastTree"},
+            { "alg": "Prediction.GAM"}
+        ]
+    },
+
+    "input": {
+        "type": "csv",
+        "sep": ";",
+        "data": [
+            { "id": "seconds", 
+                "conv": [ "datetime_to_epoch", "seconds", "@format", "@origin" ] 
+            },    
+            { "id": "lat" },
+            { "id": "lon" },
+            { "id": "pais" , "default": "794" },  
+            { "id": "estado"},
+            { "id": "cidade"},
+            { "id": "bairro"},
+            { "id": "volume"}
+        ]},
+
+
+        "bairros_rio_rj": {
+            "caption": "Neighborhoods of Rio de Janeiro ",
+            "items": [
+                { "id": "Niterói", "cod": 1002,
+					"lat0": -22.854330, "lon0": -43.155011, "lat1": -22.985086, "lon1": -42.943353
+                    },
+                { "id": "Abolição", "cod": 70,
+                    "lat0": -22.879679, "lon0": -43.304598, "lat1": -22.891486, "lon1": -43.294249
+                    },
+                { "id": "Acari", "cod": 111,
+                    "lat0": -22.813426, "lon0": -43.351143, "lat1": -22.829174, "lon1": -43.332019
+                    },
+                { "id": "Água Santa", "cod": 67, 
+                    "lat0": -22.902951, "lon0": -43.323084, "lat1": -22.918241, "lon1": -43.302443
+                    },
+                { "id": "Alto da Boa Vista", "cod": 34, 
+                    "lat0": -22.930917, "lon0": -43.301348, "lat1": -22.987941, "lon1": -43.201902
+                    },
+                  { "id": "Anchieta", "cod": 107, 
+                    "lat0": -22.813768, "lon0": -43.417794, "lat1": -22.834764, "lon1": -43.379691
+                    },
+                  { "id": "Andaraí", "cod": 37, 
+                    "lat0": -22.918346, "lon0": -43.269443, "lat1": -22.939812, "lon1": -43.240797
+                    },
+                  { "id": "Anil", "cod": 116, 
+                    "lat0": -22.943128, "lon0": -43.349651, "lat1": -22.971966, "lon1": -43.326805
+                    },
+                  { "id": "Bancários", "cod": 97, 
+                    "lat0": -22.783134, "lon0": -43.191620, "lat1": -22.801192, "lon1": -43.171987
+                    },
+                  { "id": "Bangu", "cod": 141, 
+                    "lat0": -22.815534, "lon0": -43.527247, "lat1": -22.914471, "lon1": -43.449047
+                    },
+                  { "id": "Barra da Tijuca", "cod": 128, 
+                    "lat0": -22.972704, "lon0": -43.450550, "lat1": -23.023097, "lon1": -43.284632
+                    },
+                  { "id": "Barra de Guaratiba", "cod": 152, 
+                    "lat0": -23.007744, "lon0": -43.572439, "lat1": -23.075716, "lon1": -43.522030
+                    },
+                  { "id": "Barros Filho", "cod": 112, 
+                    "lat0": -22.826021, "lon0": -43.373960, "lat1": -22.846770, "lon1": -43.357110
+                    },
+                  { "id": "Benfica", "cod": 12, 
+                    "lat0": -22.882453, "lon0": -43.253239, "lat1": -22.900570, "lon1": -43.230547
+                    },
+                  { "id": "Bento Ribeiro", "cod": 89, 
+                    "lat0": -22.855353, "lon0": -43.370050, "lat1": -22.879388, "lon1": -43.351506
+                    },
+                  { "id": "Bonsucesso", "cod": 40, 
+                    "lat0": -22.856271, "lon0": -43.265675, "lat1": -22.877032, "lon1": -43.246398
+                    },
+                  { "id": "Botafogo", "cod": 20, 
+                    "lat0": -22.938887, "lon0": -43.201654, "lat1": -22.963262, "lon1": -43.169573
+                    },
+                  { "id": "Brás de Pina", "cod": 45, 
+                    "lat0": -22.818443, "lon0": -43.318845, "lat1": -22.840010, "lon1": -43.279217
+                    },
+                  { "id": "Cachambi", "cod": 65, 
+                    "lat0": -22.882067, "lon0": -43.286114, "lat1": -22.899411, "lon1": -43.263212
+                    },
+                  { "id": "Cacuia", "cod": 93, 
+                    "lat0": -22.810652, "lon0": -43.192223, "lat1": -22.833551, "lon1": -43.175424
+                    },
+                  { "id": "Caju", "cod": 4, 
+                    "lat0": -22.867016, "lon0": -43.239241, "lat1": -22.898958, "lon1": -43.202396
+                    },
+                  { "id": "Camorim", "cod": 129, 
+                    "lat0": -22.945265, "lon0": -43.447436, "lat1": -22.992141, "lon1": -43.407810
+                    },
+                  { "id": "Campinho", "cod": 78, 
+                    "lat0": -22.879218, "lon0": -43.356626, "lat1": -22.889842, "lon1": -43.339723
+                    },
+                  { "id": "Campo Grande", "cod": 144, 
+                    "lat0": -22.823877, "lon0": -43.632170, "lat1": -22.952667, "lon1": -43.472845
+                    },
+                  { "id": "Campo dos Afonsos", "cod": 136, 
+                    "lat0": -22.866635, "lon0": -43.398215, "lat1": -22.887577, "lon1": -43.372933
+                    },
+                  { "id": "Cascadura", "cod": 82, 
+                    "lat0": -22.875939, "lon0": -43.342041, "lat1": -22.896208, "lon1": -43.314845
+                    },
+                  { "id": "Catete", "cod": 18, 
+                    "lat0": -22.921841, "lon0": -43.186084, "lat1": -22.932748, "lon1": -43.176425
+                    },
+                  { "id": "Catumbi", "cod": 6, 
+                    "lat0": -22.913632, "lon0": -43.201457, "lat1": -22.926100, "lon1": -43.193422
+                    },
+                  { "id": "Cavalcanti", "cod": 80, 
+                    "lat0": -22.863355, "lon0": -43.325617, "lat1": -22.880038, "lon1": -43.308487
+                    },
+                  { "id": "Centro", "cod": 5, 
+                    "lat0": -22.892290, "lon0": -43.198281, "lat1": -22.918377, "lon1": -43.157825
+                    },
+                  { "id": "Cidade Nova", "cod": 8, 
+                    "lat0": -22.904687, "lon0": -43.209844, "lat1": -22.914427, "lon1": -43.195050
+                    },
+                  { "id": "Cidade Universitária", "cod": 105, 
+                    "lat0": -22.836332, "lon0": -43.243170, "lat1": -22.870500, "lon1": -43.208218
+                    },
+                  { "id": "Cidade de Deus", "cod": 118, 
+                    "lat0": -22.941414, "lon0": -43.372278, "lat1": -22.953779, "lon1": -43.352941
+                    },
+                  { "id": "Cocotá", "cod": 96, 
+                    "lat0": -22.799293, "lon0": -43.185010, "lat1": -22.811132, "lon1": -43.175204
+                    },
+                  { "id": "Coelho Neto", "cod": 110, 
+                    "lat0": -22.822687, "lon0": -43.360158, "lat1": -22.839696, "lon1": -43.337116
+                    },
+                  { "id": "Colégio", "cod": 77, 
+                    "lat0": -22.832054, "lon0": -43.346924, "lat1": -22.848447, "lon1": -43.325677
+                    },
+                  { "id": "Complexo do Alemão", "cod": 156, 
+                    "lat0": -22.853074, "lon0": -43.285838, "lat1": -22.869113, "lon1": -43.257365
+                    },
+                  { "id": "Copacabana", "cod": 24, 
+                    "lat0": -22.957327, "lon0": -43.197924, "lat1": -22.987849, "lon1": -43.169573
+                    },
+                  { "id": "Cordovil", "cod": 46, 
+                    "lat0": -22.803308, "lon0": -43.313581, "lat1": -22.831885, "lon1": -43.272168
+                    },
+                  { "id": "Cosme Velho", "cod": 19, 
+                    "lat0": -22.934445, "lon0": -43.208697, "lat1": -22.946671, "lon1": -43.191826
+                    },
+                  { "id": "Cosmos", "cod": 147, 
+                    "lat0": -22.884993, "lon0": -43.629100, "lat1": -22.936210, "lon1": -43.595578
+                    },
+                  { "id": "Costa Barros", "cod": 113, 
+                    "lat0": -22.816743, "lon0": -43.379787, "lat1": -22.831975, "lon1": -43.359917
+                    },
+                  { "id": "Curicica", "cod": 119, 
+                    "lat0": -22.937438, "lon0": -43.405238, "lat1": -22.963296, "lon1": -43.375267
+                    },
+                  { "id": "Del Castilho", "cod": 53, 
+                    "lat0": -22.872749, "lon0": -43.281817, "lat1": -22.886548, "lon1": -43.263483
+                    },
+                  { "id": "Deodoro", "cod": 134, 
+                    "lat0": -22.836271, "lon0": -43.398205, "lat1": -22.867506, "lon1": -43.374800
+                    },
+                  { "id": "Encantado", "cod": 68, 
+                    "lat0": -22.888278, "lon0": -43.309992, "lat1": -22.904639, "lon1": -43.297027
+                    },
+                  { "id": "Engenheiro Leal", "cod": 81, 
+                    "lat0": -22.870740, "lon0": -43.331541, "lat1": -22.878499, "lon1": -43.318962
+                    },
+                  { "id": "Engenho Novo", "cod": 61, 
+                    "lat0": -22.895979, "lon0": -43.277308, "lat1": -22.920404, "lon1": -43.258184
+                    },
+                  { "id": "Engenho da Rainha", "cod": 55, 
+                    "lat0": -22.852560, "lon0": -43.306276, "lat1": -22.873300, "lon1": -43.284270
+                    },
+                  { "id": "Engenho de Dentro", "cod": 66, 
+                    "lat0": -22.882905, "lon0": -43.305971, "lat1": -22.921138, "lon1": -43.284803
+                    },
+                  { "id": "Estácio", "cod": 9, 
+                    "lat0": -22.911695, "lon0": -43.210103, "lat1": -22.922949, "lon1": -43.196423
+                    },
+                  { "id": "Flamengo", "cod": 15, 
+                    "lat0": -22.924472, "lon0": -43.181337, "lat1": -22.944267, "lon1": -43.168459
+                    },
+                  { "id": "Freguesia (Ilha)", "cod": 98, 
+                    "lat0": -22.775588, "lon0": -43.185673, "lat1": -22.796788, "lon1": -43.155621
+                    },
+                  { "id": "Freguesia (Jacarepaguá)", "cod": 120, 
+                    "lat0": -22.905758, "lon0": -43.361301, "lat1": -22.954489, "lon1": -43.320531
+                    },
+                  { "id": "Galeão", "cod": 104, 
+                    "lat0": -22.783724, "lon0": -43.265905, "lat1": -22.833896, "lon1": -43.210432
+                    },
+                  { "id": "Gamboa", "cod": 2, 
+                    "lat0": -22.891995, "lon0": -43.200061, "lat1": -22.903645, "lon1": -43.186088
+                    },
+                  { "id": "Gardênia Azul", "cod": 117, 
+                    "lat0": -22.952691, "lon0": -43.357228, "lat1": -22.963613, "lon1": -43.343477
+                    },
+                  { "id": "Gericinó", "cod": 160, 
+                    "lat0": -22.827144, "lon0": -43.487625, "lat1": -22.856286, "lon1": -43.469257
+                    },
+                  { "id": "Glória", "cod": 16, 
+                    "lat0": -22.910721, "lon0": -43.180516, "lat1": -22.925621, "lon1": -43.167004
+                    },
+                  { "id": "Grajaú", "cod": 38, 
+                    "lat0": -22.915309, "lon0": -43.286530, "lat1": -22.944460, "lon1": -43.253050
+                    },
+                  { "id": "Grumari", "cod": 133, 
+                    "lat0": -23.033004, "lon0": -43.558580, "lat1": -23.076334, "lon1": -43.500857
+                    },
+                  { "id": "Guadalupe", "cod": 106, 
+                    "lat0": -22.824889, "lon0": -43.387925, "lat1": -22.850767, "lon1": -43.360358
+                    },
+                  { "id": "Guaratiba", "cod": 151, 
+                    "lat0": -22.931543, "lon0": -43.676077, "lat1": -23.063410, "lon1": -43.516315
+                    },
+                  { "id": "Gávea", "cod": 29, 
+                    "lat0": -22.970351, "lon0": -43.257868, "lat1": -22.990721, "lon1": -43.224357
+                    },
+                  { "id": "Higienópolis", "cod": 50, 
+                    "lat0": -22.867791, "lon0": -43.268512, "lat1": -22.881237, "lon1": -43.254698
+                    },
+                  { "id": "Honório Gurgel", "cod": 87, 
+                    "lat0": -22.835855, "lon0": -43.362903, "lat1": -22.856364, "lon1": -43.351736
+                    },
+                  { "id": "Humaitá", "cod": 21, 
+                    "lat0": -22.948564, "lon0": -43.210022, "lat1": -22.962738, "lon1": -43.195388
+                    },
+                  { "id": "Inhaúma", "cod": 54, 
+                    "lat0": -22.856882, "lon0": -43.294949, "lat1": -22.883210, "lon1": -43.267531
+                    },
+                  { "id": "Inhoaíba", "cod": 146, 
+                    "lat0": -22.889647, "lon0": -43.606947, "lat1": -22.934361, "lon1": -43.577570
+                    },
+                  { "id": "Ipanema", "cod": 25, 
+                    "lat0": -22.977123, "lon0": -43.215610, "lat1": -22.990967, "lon1": -43.188401
+                    },
+                  { "id": "Irajá", "cod": 76, 
+                    "lat0": -22.812652, "lon0": -43.342132, "lat1": -22.856004, "lon1": -43.312739
+                    },
+                  { "id": "Itanhangá", "cod": 127, 
+                    "lat0": -22.965307, "lon0": -43.341902, "lat1": -23.005650, "lon1": -43.282707
+                    },
+                  { "id": "Jabour", "cod": 163, 
+                    "lat0": -22.878210, "lon0": -43.497126, "lat1": -22.883450, "lon1": -43.489597
+                    },
+                  { "id": "Jacarepaguá", "cod": 115, 
+                    "lat0": -22.907819, "lon0": -43.472845, "lat1": -22.981731, "lon1": -43.278390
+                    },
+                  { "id": "Jacarezinho", "cod": 155, 
+                    "lat0": -22.881599, "lon0": -43.265073, "lat1": -22.894555, "lon1": -43.248687
+                    },
+                  { "id": "Jacaré", "cod": 51, 
+                    "lat0": -22.887624, "lon0": -43.266552, "lat1": -22.898770, "lon1": -43.249089
+                    },
+                  { "id": "Jardim América", "cod": 49, 
+                    "lat0": -22.801183, "lon0": -43.331436, "lat1": -22.819566, "lon1": -43.315722
+                    },
+                  { "id": "Jardim Botânico", "cod": 28, 
+                    "lat0": -22.954485, "lon0": -43.242707, "lat1": -22.972537, "lon1": -43.203077
+                    },
+                  { "id": "Jardim Carioca", "cod": 100, 
+                    "lat0": -22.799793, "lon0": -43.204302, "lat1": -22.812059, "lon1": -43.182642
+                    },
+                  { "id": "Jardim Guanabara", "cod": 99, 
+                    "lat0": -22.804072, "lon0": -43.214793, "lat1": -22.820225, "lon1": -43.187543
+                    },
+                  { "id": "Jardim Sulacap", "cod": 137, 
+                    "lat0": -22.879365, "lon0": -43.417520, "lat1": -22.907001, "lon1": -43.374038
+                    },
+                  { "id": "Joá", "cod": 126, 
+                    "lat0": -23.001111, "lon0": -43.297202, "lat1": -23.017015, "lon1": -43.275585
+                    },
+                  { "id": "Lagoa", "cod": 27, 
+                    "lat0": -22.959606, "lon0": -43.225955, "lat1": -22.980869, "lon1": -43.194974
+                    },
+                  { "id": "Lapa", "cod": 161, 
+                    "lat0": -22.910210, "lon0": -43.186665, "lat1": -22.917907, "lon1": -43.175542
+                    },
+                  { "id": "Laranjeiras", "cod": 17, 
+                    "lat0": -22.926343, "lon0": -43.199492, "lat1": -22.946278, "lon1": -43.178383
+                    },
+                  { "id": "Leblon", "cod": 26, 
+                    "lat0": -22.976517, "lon0": -43.237955, "lat1": -22.989635, "lon1": -43.214166
+                    },
+                  { "id": "Leme", "cod": 23, 
+                    "lat0": -22.957327, "lon0": -43.174381, "lat1": -22.966468, "lon1": -43.158616
+                    },
+                  { "id": "Lins de Vasconcelos", "cod": 62, 
+                    "lat0": -22.903981, "lon0": -43.297576, "lat1": -22.921946, "lon1": -43.270472
+                    },
+                  { "id": "Madureira", "cod": 83, 
+                    "lat0": -22.859092, "lon0": -43.349747, "lat1": -22.883082, "lon1": -43.324258
+                    },
+                  { "id": "Magalhães Bastos", "cod": 138, 
+                    "lat0": -22.862037, "lon0": -43.420576, "lat1": -22.882792, "lon1": -43.405019
+                    },
+                  { "id": "Mangueira", "cod": 11, 
+                    "lat0": -22.899053, "lon0": -43.242614, "lat1": -22.909145, "lon1": -43.231475
+                    },
+                  { "id": "Manguinhos", "cod": 39, 
+                    "lat0": -22.869062, "lon0": -43.256606, "lat1": -22.888918, "lon1": -43.233499
+                    },
+                  { "id": "Maracanã", "cod": 35, 
+                    "lat0": -22.908407, "lon0": -43.239572, "lat1": -22.919603, "lon1": -43.215285
+                    },
+                  { "id": "Marechal Hermes", "cod": 90, 
+                    "lat0": -22.846770, "lon0": -43.384841, "lat1": -22.877300, "lon1": -43.357601
+                    },
+                  { "id": "Maria da Graça", "cod": 52, 
+                    "lat0": -22.878028, "lon0": -43.272335, "lat1": -22.888101, "lon1": -43.255769
+                    },
+                  { "id": "Maré", "cod": 157, 
+                    "lat0": -22.835919, "lon0": -43.256239, "lat1": -22.880116, "lon1": -43.232643
+                    },
+                  { "id": "Moneró", "cod": 102, 
+                    "lat0": -22.793539, "lon0": -43.202694, "lat1": -22.800031, "lon1": -43.191311
+                    },
+                  { "id": "Méier", "cod": 63, 
+                    "lat0": -22.892152, "lon0": -43.293752, "lat1": -22.910684, "lon1": -43.270773
+                    },
+                  { "id": "Olaria", "cod": 42, 
+                    "lat0": -22.835591, "lon0": -43.292086, "lat1": -22.857703, "lon1": -43.254547
+                    },
+                  { "id": "Osvaldo Cruz", "cod": 88, 
+                    "lat0": -22.859368, "lon0": -43.357436, "lat1": -22.882200, "lon1": -43.342363
+                    },
+                  { "id": "Paciência", "cod": 148, 
+                    "lat0": -22.855770, "lon0": -43.666712, "lat1": -22.939747, "lon1": -43.612479
+                    },
+                  { "id": "Padre Miguel", "cod": 140, 
+                    "lat0": -22.855877, "lon0": -43.461489, "lat1": -22.904227, "lon1": -43.440013
+                    },
+                  { "id": "Paquetá", "cod": 13, 
+                    "lat0": -22.748794, "lon0": -43.114353, "lat1": -22.769871, "lon1": -43.101760
+                    },
+                  { "id": "Parada de Lucas", "cod": 47, 
+                    "lat0": -22.805671, "lon0": -43.316568, "lat1": -22.825857, "lon1": -43.287634
+                    },
+                  { "id": "Parque Anchieta", "cod": 108, 
+                    "lat0": -22.825195, "lon0": -43.435128, "lat1": -22.846830, "lon1": -43.395139
+                    },
+                  { "id": "Parque Colúmbia", "cod": 159, 
+                    "lat0": -22.807679, "lon0": -43.351876, "lat1": -22.822697, "lon1": -43.330877
+                    },
+                  { "id": "Pavuna", "cod": 114, 
+                    "lat0": -22.802210, "lon0": -43.390421, "lat1": -22.826540, "lon1": -43.327568
+                    },
+                  { "id": "Pechincha", "cod": 121, 
+                    "lat0": -22.919381, "lon0": -43.363753, "lat1": -22.941731, "lon1": -43.342655
+                    },
+                  { "id": "Pedra de Guaratiba", "cod": 153, 
+                    "lat0": -22.988779, "lon0": -43.653242, "lat1": -23.008655, "lon1": -43.626481
+                    },
+                  { "id": "Penha", "cod": 43, 
+                    "lat0": -22.819345, "lon0": -43.297418, "lat1": -22.852560, "lon1": -43.254761
+                    },
+                  { "id": "Penha Circular", "cod": 44, 
+                    "lat0": -22.810384, "lon0": -43.306696, "lat1": -22.854921, "lon1": -43.268817
+                    },
+                  { "id": "Piedade", "cod": 69, 
+                    "lat0": -22.875064, "lon0": -43.326671, "lat1": -22.910720, "lon1": -43.301151
+                    },
+                  { "id": "Pilares", "cod": 71, 
+                    "lat0": -22.870892, "lon0": -43.303805, "lat1": -22.890341, "lon1": -43.286577
+                    },
+                  { "id": "Pitangueiras", "cod": 94, 
+                    "lat0": -22.812416, "lon0": -43.185973, "lat1": -22.820639, "lon1": -43.174946
+                    },
+                  { "id": "Portuguesa", "cod": 103, 
+                    "lat0": -22.792115, "lon0": -43.212919, "lat1": -22.806020, "lon1": -43.200368
+                    },
+                  { "id": "Praia da Bandeira", "cod": 95, 
+                    "lat0": -22.806271, "lon0": -43.183647, "lat1": -22.814001, "lon1": -43.175093
+                    },
+                  { "id": "Praça Seca", "cod": 124, 
+                    "lat0": -22.883381, "lon0": -43.368797, "lat1": -22.912915, "lon1": -43.335542
+                    },
+                  { "id": "Praça da Bandeira", "cod": 32, 
+                    "lat0": -22.906866, "lon0": -43.219832, "lat1": -22.916371, "lon1": -43.207865
+                    },
+                  { "id": "Quintino Bocaiúva", "cod": 79, 
+                    "lat0": -22.878691, "lon0": -43.339176, "lat1": -22.912789, "lon1": -43.310550
+                    },
+                  { "id": "Ramos", "cod": 41, 
+                    "lat0": -22.839020, "lon0": -43.267685, "lat1": -22.862629, "lon1": -43.247089
+                    },
+                  { "id": "Realengo", "cod": 139, 
+                    "lat0": -22.841837, "lon0": -43.470036, "lat1": -22.916332, "lon1": -43.405838
+                    },
+                  { "id": "Recreio dos Bandeirantes", "cod": 132, 
+                    "lat0": -22.989147, "lon0": -43.543174, "lat1": -23.041099, "lon1": -43.420176
+                    },
+                  { "id": "Riachuelo", "cod": 59, 
+                    "lat0": -22.893854, "lon0": -43.258491, "lat1": -22.911023, "lon1": -43.250952
+                    },
+                  { "id": "Ribeira", "cod": 91, 
+                    "lat0": -22.820062, "lon0": -43.175148, "lat1": -22.831661, "lon1": -43.163788
+                    },
+                  { "id": "Ricardo de Albuquerque", "cod": 109, 
+                    "lat0": -22.826894, "lon0": -43.411035, "lat1": -22.846266, "lon1": -43.383974
+                    },
+                  { "id": "Rio Comprido", "cod": 7, 
+                    "lat0": -22.915816, "lon0": -43.220401, "lat1": -22.939210, "lon1": -43.196231
+                    },
+                  { "id": "Rocha", "cod": 58, 
+                    "lat0": -22.889765, "lon0": -43.253813, "lat1": -22.909362, "lon1": -43.244172
+                    },
+                  { "id": "Rocha Miranda", "cod": 86, 
+                    "lat0": -22.837729, "lon0": -43.355991, "lat1": -22.859812, "lon1": -43.336841
+                    },
+                  { "id": "Rocinha", "cod": 154, 
+                    "lat0": -22.983377, "lon0": -43.257014, "lat1": -22.995788, "lon1": -43.239780
+                    },
+                  { "id": "Sampaio", "cod": 60, 
+                    "lat0": -22.893577, "lon0": -43.265074, "lat1": -22.911023, "lon1": -43.256515
+                    },
+                  { "id": "Santa Cruz", "cod": 149, 
+                    "lat0": -22.862503, "lon0": -43.795432, "lat1": -22.970339, "lon1": -43.613394
+                    },
+                  { "id": "Santa Teresa", "cod": 14, 
+                    "lat0": -22.911397, "lon0": -43.219106, "lat1": -22.952271, "lon1": -43.177118
+                    },
+                  { "id": "Santo Cristo", "cod": 3, 
+                    "lat0": -22.892076, "lon0": -43.210287, "lat1": -22.909466, "lon1": -43.194456
+                    },
+                  { "id": "Santíssimo", "cod": 143, 
+                    "lat0": -22.860353, "lon0": -43.541545, "lat1": -22.897542, "lon1": -43.502717
+                    },
+                  { "id": "Saúde", "cod": 1, 
+                    "lat0": -22.893720, "lon0": -43.187750, "lat1": -22.900587, "lon1": -43.180739
+                    },
+                  { "id": "Senador Camará", "cod": 142, 
+                    "lat0": -22.864456, "lon0": -43.512834, "lat1": -22.931793, "lon1": -43.467519
+                    },
+                  { "id": "Senador Vasconcelos", "cod": 145, 
+                    "lat0": -22.882016, "lon0": -43.546815, "lat1": -22.909040, "lon1": -43.508771
+                    },
+                  { "id": "Sepetiba", "cod": 150, 
+                    "lat0": -22.945403, "lon0": -43.720302, "lat1": -22.991901, "lon1": -43.670789
+                    },
+                  { "id": "São Conrado", "cod": 31, 
+                    "lat0": -22.979576, "lon0": -43.285354, "lat1": -23.003292, "lon1": -43.249131
+                    },
+                  { "id": "São Cristóvão", "cod": 10, 
+                    "lat0": -22.884944, "lon0": -43.236732, "lat1": -22.911937, "lon1": -43.209580
+                    },
+                  { "id": "São Francisco Xavier", "cod": 57, 
+                    "lat0": -22.895443, "lon0": -43.248338, "lat1": -22.908859, "lon1": -43.237237
+                    },
+                  { "id": "Tanque", "cod": 123, 
+                    "lat0": -22.900522, "lon0": -43.379656, "lat1": -22.927496, "lon1": -43.332973
+                    },
+                  { "id": "Taquara", "cod": 122, 
+                    "lat0": -22.902574, "lon0": -43.419763, "lat1": -22.947679, "lon1": -43.359094
+                    },
+                  { "id": "Tauá", "cod": 101, 
+                    "lat0": -22.788478, "lon0": -43.197657, "lat1": -22.806248, "lon1": -43.177634
+                    },
+                  { "id": "Tijuca", "cod": 33, 
+                    "lat0": -22.912834, "lon0": -43.273751, "lat1": -22.950811, "lon1": -43.211787
+                    },
+                  { "id": "Todos os Santos", "cod": 64, 
+                    "lat0": -22.887056, "lon0": -43.291334, "lat1": -22.902063, "lon1": -43.278179
+                    },
+                  { "id": "Tomás Coelho", "cod": 56, 
+                    "lat0": -22.857132, "lon0": -43.315147, "lat1": -22.876696, "lon1": -43.297795
+                    },
+                  { "id": "Turiaçú", "cod": 85, 
+                    "lat0": -22.856004, "lon0": -43.350543, "lat1": -22.868880, "lon1": -43.334107
+                    },
+                  { "id": "Urca", "cod": 22, 
+                    "lat0": -22.938612, "lon0": -43.180695, "lat1": -22.961563, "lon1": -43.150197
+                    },
+                  { "id": "Vargem Grande", "cod": 131, 
+                    "lat0": -22.931573, "lon0": -43.523184, "lat1": -23.021078, "lon1": -43.441743
+                    },
+                  { "id": "Vargem Pequena", "cod": 130, 
+                    "lat0": -22.959746, "lon0": -43.495220, "lat1": -22.999097, "lon1": -43.427663
+                    },
+                  { "id": "Vasco da Gama", "cod": 158, 
+                    "lat0": -22.884989, "lon0": -43.233622, "lat1": -22.898853, "lon1": -43.220661
+                    },
+                  { "id": "Vaz Lobo", "cod": 84, 
+                    "lat0": -22.853663, "lon0": -43.337103, "lat1": -22.864628, "lon1": -43.320562
+                    },
+                  { "id": "Vicente de Carvalho", "cod": 73, 
+                    "lat0": -22.848207, "lon0": -43.323905, "lat1": -22.864351, "lon1": -43.306694
+                    },
+                  { "id": "Vidigal", "cod": 30, 
+                    "lat0": -22.988194, "lon0": -43.250928, "lat1": -23.001154, "lon1": -43.226762
+                    },
+                  { "id": "Vigário Geral", "cod": 48, 
+                    "lat0": -22.799821, "lon0": -43.320883, "lat1": -22.819838, "lon1": -43.299784
+                    },
+                  { "id": "Vila Isabel", "cod": 36, 
+                    "lat0": -22.907584, "lon0": -43.263114, "lat1": -22.924276, "lon1": -43.234866
+                    },
+                  { "id": "Vila Kennedy", "cod": 162, 
+                    "lat0": -22.849915, "lon0": -43.495890, "lat1": -22.862374, "lon1": -43.479130
+                    },
+                  { "id": "Vila Kosmos", "cod": 72, 
+                    "lat0": -22.845953, "lon0": -43.311355, "lat1": -22.861546, "lon1": -43.293534
+                    },
+                  { "id": "Vila Militar", "cod": 135, 
+                    "lat0": -22.837839, "lon0": -43.426567, "lat1": -22.885649, "lon1": -43.381535
+                    },
+                  { "id": "Vila Valqueire", "cod": 125, 
+                    "lat0": -22.876589, "lon0": -43.377569, "lat1": -22.902827, "lon1": -43.354873
+                    },
+                  { "id": "Vila da Penha", "cod": 74, 
+                    "lat0": -22.836135, "lon0": -43.317764, "lat1": -22.850386, "lon1": -43.301874
+                    },
+                  { "id": "Vista Alegre", "cod": 75, 
+                    "lat0": -22.825741, "lon0": -43.319603, "lat1": -22.833399, "lon1": -43.307875
+                    },
+                  { "id": "Zumbi", "cod": 92, 
+                    "lat0": -22.818915, "lon0": -43.180102, "lat1": -22.823867, "lon1": -43.172915
+                    }
+    
+            ] 
+        },
+    
+        "bairros_nit_rj": {
+            "caption": "Neighborhoods of Niteroi",
+            "items": [
+				{ "id": "Badu", "cod": 31 },
+				{ "id": "Bairro de Fátima", "cod": 44 },
+				{ "id": "Baldeador", "cod": 13 },
+				{ "id": "Barreto", "cod": 5 },
+				{ "id": "Boa Viagem", "cod": 40 },
+				{ "id": "Cachoeira", "cod": 50 },
+				{ "id": "Cafubá", "cod": 18 },
+				{ "id": "Camboinhas", "cod": 21 },
+				{ "id": "Cantagalo", "cod": 32 },
+				{ "id": "Caramujo", "cod": 14 },
+				{ "id": "Centro", "cod": 37 },
+				{ "id": "Charitas", "cod": 51 },
+				{ "id": "Cubango", "cod": 10 },
+				{ "id": "Engenho do Mato", "cod": 25 },
+				{ "id": "Engenhoca", "cod": 8 },
+				{ "id": "Fonseca", "cod": 9 },
+				{ "id": "Gragoatá", "cod": 39 },
+				{ "id": "Icaraí", "cod": 43 },
+				{ "id": "Ilha da Conceição", "cod": 4 },
+				{ "id": "Ingá", "cod": 41 },
+				{ "id": "Itacoatiara", "cod": 26 },
+				{ "id": "Itaipú", "cod": 24 },
+				{ "id": "Ititioca", "cod": 27 },
+				{ "id": "Jacaré", "cod": 19 },
+				{ "id": "Jardim Imbuí", "cod": 16 },
+				{ "id": "Jurujuba", "cod": 52 },
+				{ "id": "Largo da Batalha", "cod": 28 },
+				{ "id": "Maceió", "cod": 29 },
+				{ "id": "Maravista", "cod": 23 },
+				{ "id": "Maria Paula", "cod": 33 },
+				{ "id": "Matapaca", "cod": 34 },
+				{ "id": "Morro do Estado", "cod": 42 },
+				{ "id": "Muriqui_1", "cod": 1 },
+				{ "id": "Muriqui_35", "cod": 35 },
+				{ "id": "Piratininga", "cod": 17 },
+				{ "id": "Ponta d'Areia", "cod": 36 },
+				{ "id": "Pé Pequeno", "cod": 45 },
+				{ "id": "Rio do Ouro", "cod": 2 },
+				{ "id": "Santa Bárbara", "cod": 15 },
+				{ "id": "Santa Rosa", "cod": 46 },
+				{ "id": "Santana", "cod": 6 },
+				{ "id": "Santo Antônio", "cod": 20 },
+				{ "id": "Sapê", "cod": 30 },
+				{ "id": "Serra Grande", "cod": 22 },
+				{ "id": "São Domingos", "cod": 38 },
+				{ "id": "São Francisco", "cod": 49 },
+				{ "id": "São Lourenço", "cod": 7 },
+				{ "id": "Tenente Jardim", "cod": 11 },
+				{ "id": "Vila Progresso", "cod": 0 },
+				{ "id": "Viradouro", "cod": 48 },
+				{ "id": "Vital Brazil", "cod": 47 },
+				{ "id": "Viçoso Jardim", "cod": 12 },
+				{ "id": "Várzea das Moças", "cod": 3 }			 ]
+        }
+    
+
+}
